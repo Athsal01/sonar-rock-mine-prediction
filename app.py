@@ -2,65 +2,122 @@
 import streamlit as st
 import joblib
 import pandas as pd
-
+import numpy as np
 
 # --------------------------------
-# 1. Page Configuration
+# PAGE CONFIGURATION
 # --------------------------------
 
 st.set_page_config(
-    page_title="Sonar AI Prediction",
-    page_icon="🔊",
+    page_title="Sonar Rock vs Mine Prediction",
+    page_icon="🌊",
     layout="wide"
 )
 
+# --------------------------------
+# LOAD MODEL
+# --------------------------------
+
+model_bundle = joblib.load("sonar_model_bundle.pkl")
+
+model = model_bundle["model"]
+scaler = model_bundle["scaler"]
+feature_names = model_bundle["feature_names"]
 
 # --------------------------------
-# 2. Custom CSS
+# CUSTOM CSS
 # --------------------------------
 
 st.markdown("""
 <style>
 
+/* Main background */
 .stApp {
-    background-color: #0E1117;
-    color: white;
+    background-color: #0e1117;
+    color: #ffffff;
 }
 
-h1 {
-    color: #A78BFA;
-    text-align: center;
-    font-size: 38px;
+/* Headings */
+h1, h2, h3 {
+    color: #c084fc !important;
 }
 
-h2, h3 {
-    color: #C4B5FD;
+/* General text */
+p, li {
+    color: #e2e8f0 !important;
 }
 
-p, label {
-    color: #D1D5DB;
+/* Input labels */
+.stNumberInput label,
+.stTextArea label,
+.stRadio label {
+    color: #ffffff !important;
+    font-weight: 600 !important;
 }
 
+/* Number input boxes */
+.stNumberInput input {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 2px solid #a855f7 !important;
+    border-radius: 8px !important;
+}
+
+/* Bulk text area */
+.stTextArea textarea {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border: 2px solid #a855f7 !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+}
+
+.stTextArea textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* Radio buttons */
+.stRadio div[role="radiogroup"] label {
+    color: #ffffff !important;
+}
+
+/* Buttons */
 div.stButton > button {
-    background-color: #7C3AED;
-    color: white;
-    border-radius: 10px;
-    border: none;
-    padding: 12px 30px;
-    font-weight: bold;
-    width: 100%;
+    background-color: #9333ea !important;
+    color: #ffffff !important;
+    border-radius: 10px !important;
+    border: 1px solid #c084fc !important;
+    padding: 10px 25px !important;
+    font-weight: bold !important;
 }
 
 div.stButton > button:hover {
-    background-color: #6D28D9;
-    color: white;
-    border: 1px solid #A78BFA;
+    background-color: #7e22ce !important;
+    color: #ffffff !important;
 }
 
+/* Metric cards */
 [data-testid="stMetric"] {
-    background-color: #1E1B2E;
-    padding: 20px;
+    background-color: #1e293b;
+    border: 1px solid #9333ea;
+    padding: 15px;
     border-radius: 12px;
+}
+
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"],
+[data-testid="stMetricDelta"] {
+    color: #ffffff !important;
+}
+
+/* Captions */
+.stCaption {
+    color: #cbd5e1 !important;
+}
+
+/* Dividers */
+hr {
+    border-color: #475569;
 }
 
 </style>
@@ -68,311 +125,273 @@ div.stButton > button:hover {
 
 
 # --------------------------------
-# 3. Load Trained Model
+# HEADER
 # --------------------------------
 
-model_bundle = joblib.load("sonar_model_bundle.pkl")
+st.title("🌊 Sonar Rock vs Mine Prediction")
 
-model = model_bundle["model"]
-feature_names = model_bundle["feature_names"]
+st.markdown("""
+Predict whether an underwater sonar signal indicates
+a **Rock 🪨** or a **Mine 💣** using Machine Learning.
+""")
+
+st.markdown("---")
 
 
 # --------------------------------
-# 4. Dashboard Header
+# MODEL PERFORMANCE
 # --------------------------------
 
-st.title("🔊 SONAR AI CLASSIFICATION")
+st.subheader("📊 Model Performance")
 
-st.markdown(
-    "<p style='text-align:center; font-size:18px;'>"
-    "Underwater Object Detection System | Rock vs Mine"
-    "</p>",
-    unsafe_allow_html=True
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric("Accuracy", "83.33%")
+col2.metric("Precision", "77.78%")
+col3.metric("Recall", "95.45%")
+col4.metric("F1 Score", "85.71%")
+
+st.markdown("---")
+
+
+# --------------------------------
+# INPUT SECTION
+# --------------------------------
+
+st.subheader("🔍 Enter Sonar Data")
+
+input_method = st.radio(
+    "Choose Input Method",
+    ["Bulk Input (Paste 60 Values)", "Individual Inputs"],
+    horizontal=True
 )
 
-st.divider()
 
-st.success("Machine Learning Model Loaded Successfully!")
+# --------------------------------
+# PREDICTION FUNCTION
+# --------------------------------
+
+def make_prediction(values):
+
+    input_df = pd.DataFrame(
+        [values],
+        columns=feature_names
+    )
+
+    input_scaled = scaler.transform(input_df)
+
+    prediction = model.predict(input_scaled)[0]
+
+    probabilities = model.predict_proba(input_scaled)[0]
+
+    mine_index = list(model.classes_).index("M")
+    rock_index = list(model.classes_).index("R")
+
+    mine_probability = probabilities[mine_index] * 100
+    rock_probability = probabilities[rock_index] * 100
+
+    return prediction, mine_probability, rock_probability
 
 
 # --------------------------------
-# 5. Project Information
+# DISPLAY RESULT FUNCTION
 # --------------------------------
 
-col1, col2, col3 = st.columns(3)
+def display_result(prediction, mine_probability, rock_probability):
 
-col1.metric("Model", "Logistic Regression")
-col2.metric("Input Features", "60")
-col3.metric("Classes", "2")
+    st.markdown("---")
 
-st.divider()
+    st.subheader("🎯 Prediction Result")
 
-
-# --------------------------------
-# 6. Sonar Measurements
-# --------------------------------
-
-st.header("📊 Sonar Measurements")
-
-st.write(
-    "Enter the 60 sonar signal measurements below. "
-    "Each measurement must be between 0 and 1."
-)
-
-cols = st.columns(3)
-
-values = []
-
-for i in range(60):
-
-    with cols[i % 3]:
-
-        value = st.number_input(
-            f"Feature {i + 1}",
-            min_value=0.0,
-            max_value=1.0,
-            value=0.05,
-            step=0.01,
-            format="%.4f",
-            key=f"feature_{i}"
-        )
-
-        values.append(value)
-
-
-st.divider()
-
-
-# --------------------------------
-# 7. Prediction
-# --------------------------------
-
-st.header("🤖 Classification Result")
-
-if st.button("PREDICT OBJECT"):
-
-    if len(values) != 60:
-
-        st.error("Exactly 60 measurements are required.")
-
-    elif any(value < 0 or value > 1 for value in values):
-
-        st.error("Measurements must be between 0 and 1.")
-
+    if prediction == "M":
+        st.error("⚠️ Prediction: MINE")
     else:
+        st.success("🪨 Prediction: ROCK")
 
-        # Convert input measurements into DataFrame
+    col1, col2 = st.columns(2)
 
-        input_df = pd.DataFrame(
-            [values],
-            columns=feature_names
-        )
+    col1.metric(
+        "Mine Probability",
+        f"{mine_probability:.2f}%"
+    )
 
-        # Predict object
+    col2.metric(
+        "Rock Probability",
+        f"{rock_probability:.2f}%"
+    )
 
-        prediction = model.predict(input_df)
+    st.write("### Prediction Confidence")
 
-        # Calculate class probabilities
+    st.write("💣 Mine Probability")
+    st.progress(float(mine_probability / 100))
 
-        probabilities = model.predict_proba(input_df)
+    st.write("🪨 Rock Probability")
+    st.progress(float(rock_probability / 100))
 
-        rock_probability = probabilities[0][
-            list(model.classes_).index("R")
-        ]
 
-        mine_probability = probabilities[0][
-            list(model.classes_).index("M")
-        ]
+# --------------------------------
+# BULK INPUT
+# --------------------------------
 
-        st.success("Input Validation Successful!")
+if input_method == "Bulk Input (Paste 60 Values)":
 
-        # Display classification result
+    st.markdown("""
+    <div style="
+        background-color: #2e1065;
+        color: #ffffff;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 1px solid #a855f7;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: 600;
+    ">
+        📋 Paste all 60 numerical values separated by commas.
+    </div>
+    """, unsafe_allow_html=True)
 
-        result_col1, result_col2 = st.columns(2)
+    bulk_input = st.text_area(
+        "Sonar Feature Values",
+        placeholder="0.0491, 0.0279, 0.0592, 0.1270, ...",
+        height=160
+    )
 
-        with result_col1:
+    if st.button("🚀 Predict", key="bulk_predict"):
 
-            if prediction[0] == "R":
+        try:
 
-                st.success("🪨 OBJECT IDENTIFIED: ROCK")
+            cleaned_input = bulk_input.replace("\n", ",")
+
+            values = [
+                float(value.strip())
+                for value in cleaned_input.split(",")
+                if value.strip()
+            ]
+
+            if len(values) != 60:
+
+                st.error(
+                    f"Expected 60 values, but received {len(values)}."
+                )
+
+            elif not np.isfinite(values).all():
+
+                st.error("Please enter valid finite numbers.")
+
+            elif not all(0 <= value <= 1 for value in values):
+
+                st.error("Each feature value must be between 0 and 1.")
 
             else:
 
-                st.error("💣 OBJECT IDENTIFIED: MINE")
+                prediction, mine_probability, rock_probability = (
+                    make_prediction(values)
+                )
 
-        with result_col2:
+                display_result(
+                    prediction,
+                    mine_probability,
+                    rock_probability
+                )
 
-            st.metric(
-                "Predicted Class",
-                "ROCK" if prediction[0] == "R" else "MINE"
-            )
+        except ValueError:
 
-
-        # --------------------------------
-        # 8. Prediction Probability
-        # --------------------------------
-
-        st.subheader("📈 Prediction Probability")
-
-        confidence_col1, confidence_col2 = st.columns(2)
-
-        with confidence_col1:
-
-            st.write("🪨 Rock Probability")
-
-            st.progress(float(rock_probability))
-
-            st.metric(
-                "Rock",
-                f"{rock_probability * 100:.2f}%"
-            )
-
-        with confidence_col2:
-
-            st.write("💣 Mine Probability")
-
-            st.progress(float(mine_probability))
-
-            st.metric(
-                "Mine",
-                f"{mine_probability * 100:.2f}%"
+            st.error(
+                "Invalid input! Please enter numerical values separated by commas."
             )
 
 
 # --------------------------------
-# 9. Understanding Rock and Mine
+# INDIVIDUAL INPUT
 # --------------------------------
 
-st.divider()
+elif input_method == "Individual Inputs":
 
-st.header("📖 Understanding the Predictions")
+    st.markdown("""
+    <div style="
+        background-color: #2e1065;
+        color: #ffffff;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: 1px solid #a855f7;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: 600;
+    ">
+        ✏️ Enter all 60 sonar feature values individually.
+    </div>
+    """, unsafe_allow_html=True)
 
-rock_col, mine_col = st.columns(2)
+    values = []
 
-with rock_col:
+    cols = st.columns(3)
 
-    st.subheader("🪨 Rock")
+    for i in range(60):
 
-    st.write("""
-    A rock is a natural underwater object.
+        with cols[i % 3]:
 
-    The model identifies sonar signal patterns
-    that resemble those of rocks.
-    """)
+            value = st.number_input(
+                f"Feature {i + 1}",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.0,
+                step=0.001,
+                format="%.4f",
+                key=f"feature_{i}"
+            )
 
-with mine_col:
+            values.append(value)
 
-    st.subheader("💣 Mine")
+    if st.button("🚀 Predict", key="individual_predict"):
 
-    st.write("""
-    A mine is an underwater explosive object.
+        prediction, mine_probability, rock_probability = (
+            make_prediction(values)
+        )
 
-    The model identifies sonar signal patterns
-    that resemble those of mines.
-    """)
-
-with st.expander("How does this Machine Learning model work?"):
-
-    st.write("""
-    1. The application receives 60 sonar measurements.
-    2. The measurements are passed to the trained
-       Logistic Regression model.
-    3. The model predicts Rock or Mine.
-    4. The application displays the predicted class
-       and estimated class probabilities.
-    """)
-
-
-# --------------------------------
-# 10. Model Performance Dashboard
-# --------------------------------
-
-st.divider()
-
-st.header("📊 Model Performance")
-
-st.write(
-    "Evaluation results obtained from the test dataset "
-    "(42 samples)."
-)
-
-metric1, metric2, metric3, metric4 = st.columns(4)
-
-metric1.metric("Accuracy", "80.95%")
-
-metric2.metric("Precision (Mine)", "76.92%")
-
-metric3.metric("Recall (Mine)", "90.91%")
-
-metric4.metric("F1 Score (Mine)", "83.33%")
+        display_result(
+            prediction,
+            mine_probability,
+            rock_probability
+        )
 
 
 # --------------------------------
-# 11. Confusion Matrix
+# ABOUT PROJECT
 # --------------------------------
 
-st.subheader("Confusion Matrix")
+st.markdown("---")
 
-st.write(
-    "Rows represent actual classes and columns represent "
-    "predicted classes."
-)
+st.subheader("ℹ️ About This Project")
 
-confusion_data = pd.DataFrame(
-    [[20, 2], [6, 14]],
-    index=["Actual Mine", "Actual Rock"],
-    columns=["Predicted Mine", "Predicted Rock"]
-)
+st.markdown("""
+This project uses **Logistic Regression** to classify underwater
+sonar signals into two categories:
 
-st.dataframe(
-    confusion_data,
-    width="stretch"
-)
+- 🪨 **Rock (R)**
+- 💣 **Mine (M)**
 
-st.info(
-    "These metrics are based on the 42-sample test set "
-    "used during model evaluation."
-)
+### Technologies Used
 
+- Python
+- NumPy
+- Pandas
+- Scikit-learn
+- StandardScaler
+- Logistic Regression
+- Streamlit
 
-# --------------------------------
-# 12. About This Project
-# --------------------------------
+### Machine Learning Workflow
 
-st.divider()
+1. Data Collection
+2. Data Preprocessing
+3. Feature Scaling using StandardScaler
+4. Model Training
+5. Model Evaluation
+6. Model Deployment using Streamlit
+""")
 
-with st.expander("ℹ️ About This Project"):
+st.markdown("---")
 
-    st.write("""
-    **Project:** Sonar Rock vs Mine Prediction
-
-    **Algorithm:** Logistic Regression
-
-    **Input:** 60 sonar signal measurements
-
-    **Output:** Rock (R) or Mine (M)
-
-    **Dataset:** UCI Sonar Dataset
-
-    **Training Split:** 80%
-
-    **Testing Split:** 20%
-
-    **Framework:** Streamlit
-
-    **Libraries:** Pandas, Scikit-learn, Joblib
-    """)
-
-
-# --------------------------------
-# 13. Footer
-# --------------------------------
-
-st.divider()
-
-st.markdown(
-    "<p style='text-align:center; color:#A78BFA;'>"
-    "SONAR AI | Machine Learning Project"
-    "</p>",
-    unsafe_allow_html=True
+st.caption(
+    "Sonar Rock vs Mine Prediction | Machine Learning Project 🚀"
 )
