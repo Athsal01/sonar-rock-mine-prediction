@@ -1,61 +1,57 @@
 
 # 🔊 Sonar Rock vs Mine Prediction
 
-An end-to-end Machine Learning project that classifies underwater objects as **Rock (R)** or **Mine (M)** using sonar signal data.
+An End-to-End Machine Learning project that predicts whether an underwater object is a **Rock or a Mine** using sonar signal data.
 
-Built using Python, Scikit-learn, and Streamlit.
+## 🌐 Live Demo
 
-## 🚀 Project Overview
+🚀 **Try the application online!**
 
-This project uses sonar signal measurements to predict whether an underwater object is a rock or a mine.
+[🔊 Click Here – Sonar Rock vs Mine Prediction](https://sonar-rock-mine-prediction-8hr3jv4gixzqfketvkrgut.streamlit.app/)
 
-A Logistic Regression classification model is trained using the UCI Sonar dataset. The trained model is integrated into an interactive Streamlit web application.
+## 📌 Project Overview
+
+This project uses Machine Learning to classify underwater objects based on sonar signals.
+
+The model analyzes 60 sonar signal features and predicts whether the detected object is:
+
+- 🪨 Rock (R)
+- 💣 Mine (M)
+
+A Logistic Regression algorithm is used to train the classification model.
 
 ## ✨ Features
 
-- Predicts Rock or Mine using 60 sonar input features.
-- Interactive Streamlit web interface.
+- Predicts Rock or Mine using 60 input features.
 - Displays prediction confidence.
 - Shows Rock and Mine probabilities.
+- Interactive Streamlit web application.
 - Model performance dashboard.
 - Confusion matrix visualization.
-- Easy-to-use prediction interface.
 
-## 📸 Application Screenshots
+## 🖥️ Application Screenshots
 
-### 1. Main Dashboard
+### Sonar Prediction Dashboard
 
-![Sonar Dashboard](screenshots/Sonar_dashboard01.png.png)
+![Sonar Dashboard](screenshots/sonar-dashboard.png)
 
-### 2. Prediction Result
+### Prediction Result
 
-![Prediction Result](screenshots/Sonar_dashboard02.png.png)
+![Prediction Result](screenshots/prediction-result.png)
 
-## 🛠️ Technologies Used
-
-- Python
-- Pandas
-- Scikit-learn
-- Streamlit
-- NumPy
-- Joblib
-- Git and GitHub
-
-## 🤖 Machine Learning Model
+## 🧠 Machine Learning Model
 
 **Algorithm:** Logistic Regression
 
 **Dataset:** UCI Sonar Dataset
 
-**Input Features:** 60 sonar signal measurements
+**Input Features:** 60
 
-**Output Classes:**
-- R – Rock
-- M – Mine
+**Output Classes:** 2 (Rock and Mine)
 
 ## 📊 Model Performance
 
-The model was evaluated using a test dataset containing 42 samples.
+The model was evaluated using a test dataset of 42 samples.
 
 | Metric | Score |
 |---|---:|
@@ -71,24 +67,32 @@ The model was evaluated using a test dataset containing 42 samples.
  [ 6 14]]
 ```
 
-The matrix rows represent actual classes (Mine, Rock), and columns represent predicted classes (Mine, Rock).
+These results represent the evaluation on the selected test split, not a guarantee of real-world performance.
 
-These results represent the particular test split used during evaluation and do not guarantee real-world performance.
+## 🛠️ Technologies Used
+
+- Python
+- NumPy
+- Pandas
+- Scikit-learn
+- Joblib
+- Streamlit
+- Git and GitHub
 
 ## 📂 Project Structure
 
 ```text
 Sonar_Prediction/
 │
-├── screenshots/
-│   ├── sonar-dashboard.png
-│   └── prediction-result.png
-│
 ├── app.py
 ├── sonar_model_bundle.pkl
 ├── requirements.txt
 ├── README.md
-└── .gitignore
+├── .gitignore
+│
+└── screenshots/
+    ├── sonar-dashboard.png
+    └── prediction-result.png
 ```
 
 ## ⚙️ Installation and Setup
@@ -111,11 +115,11 @@ cd sonar-rock-mine-prediction
 python -m venv ml_env
 ```
 
-### 4. Activate the virtual environment
+### 4. Activate the environment
 
-For Windows PowerShell:
+Windows PowerShell:
 
-```powershell
+```bash
 .\ml_env\Scripts\Activate.ps1
 ```
 
@@ -125,49 +129,43 @@ For Windows PowerShell:
 pip install -r requirements.txt
 ```
 
-### 6. Run the Streamlit application
+### 6. Run the application
 
 ```bash
 python -m streamlit run app.py
 ```
 
-The application will open in your browser at:
-
-```text
-http://localhost:8501
-```
+The application will open in your browser.
 
 ## 🔄 Project Workflow
 
-1. Load the UCI Sonar dataset.
+1. Load the Sonar dataset.
 2. Separate input features and target labels.
 3. Split the dataset into training and testing sets.
-4. Train a Logistic Regression model.
+4. Train the Logistic Regression model.
 5. Evaluate model performance.
 6. Save the trained model using Joblib.
-7. Integrate the model into Streamlit.
-8. Generate predictions through the web interface.
+7. Build an interactive Streamlit application.
+8. Deploy the application using Streamlit Community Cloud.
 
 ## 🎯 Learning Outcomes
 
-Through this project, I gained practical experience in:
+Through this project, I learned:
 
 - Machine Learning classification.
-- Data handling using Pandas.
-- Model training and evaluation.
-- Prediction probability analysis.
+- Data preprocessing and model training.
+- Model evaluation using classification metrics.
 - Model serialization using Joblib.
 - Building interactive applications using Streamlit.
 - Version control using Git and GitHub.
+- Deploying Machine Learning applications to the cloud.
 
 ## 👨‍💻 Author
 
 **Athsal**
 
-B.Tech – Artificial Intelligence
-
-GitHub: https://github.com/Athsal01
+GitHub: [@Athsal01](https://github.com/Athsal01)
 
 ---
 
-⭐ If you find this project interesting, feel free to explore the repository!
+⭐ If you find this project interesting, consider giving this repository a star!
